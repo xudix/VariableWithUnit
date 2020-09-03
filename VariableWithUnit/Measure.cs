@@ -125,7 +125,7 @@ namespace VariableWithUnit
         /// </summary>
         /// <param name="measure">Another measure to be compared</param>
         /// <returns></returns>
-        public bool IsSameMeasure(Measure measure) =>
+        public bool Equals(Measure measure) =>
             this.PowerOfCurrent == measure.PowerOfCurrent &&
             this.PowerOfLength == measure.PowerOfLength &&
             this.PowerOfLuminousIntensity == measure.PowerOfLuminousIntensity &&
@@ -141,10 +141,23 @@ namespace VariableWithUnit
         /// <param name="measure2">2nd Measure to be compared</param>
         /// <returns></returns>
         public static bool IsSameMeasure(Measure measure1, Measure measure2) =>
-            measure1.IsSameMeasure(measure2);
+            measure1.Equals(measure2);
 
-        public static bool Equals(Measure measure1, Measure measure2)
+        public static bool operator ==(Measure left, Measure right) =>
+            left.Equals(right);
 
+        public static bool operator !=(Measure left, Measure right) =>
+            !left.Equals(right);
+
+        /// <summary>
+        /// Compares whether two measures are the same. They are the same if the power of all quantities are the same.
+        /// </summary>
+        /// <param name="o">o should be an instance of Measure. Otherwise, this method will return False</param>
+        /// <returns></returns>
+        public override bool Equals(object o)
+        {
+            return o is Measure measure ? this.Equals(measure) : false; // This is called "type pattern"
+        }
         #endregion
     }
 }

@@ -36,7 +36,8 @@ namespace VariableWithUnit
         /// </summary>
         /// <param name="multiplier">The Multiplier converts the variable under this specific unit to SI value.
         /// The value of the variable multiply by the Multiplier equals the value under SI unit.
-        /// E.g. the unit "kilo meter" has a multiplier of 1000; the unit "feet" has a multiplier of 0.3048.</param>
+        /// E.g. the unit "kilo meter" has a multiplier of 1000; the unit "feet" has a multiplier of 0.3048.
+        /// Multiplier should NOT be zero.</param>
         /// <param name="measure">The measure on which this unit will be based on</param>
         /// <param name="unitName">Actual name of the unit.
         /// E.g. meter, pound, mega watts, etc.</param>
@@ -56,14 +57,14 @@ namespace VariableWithUnit
             UnitName = unitName;
             UnitSymbol = unitSymbol;
         }
-        public Unit(double multiplier, int powerOfLength, int powerOfTime, int powerOfMass, int powerOfQuantity,
+        public Unit(double multiplier, int powerOfLength, int powerOfTime, int powerOfMass, int powerOfSubstanceAmount,
             int powerOfTemperature, int powerOfCurrent, int powerofLuminousIntensity, string measureName = "", string unitName = "", string unitSymbol = "")
         {
             PowerOfLength = powerOfLength;
             PowerOfCurrent = powerOfCurrent;
             PowerOfTime = powerOfTime;
             PowerOfTemperature = powerOfTemperature;
-            PowerOfSubstanceAmount = powerOfQuantity;
+            PowerOfSubstanceAmount = powerOfSubstanceAmount;
             PowerOfMass = powerOfMass;
             PowerOfLuminousIntensity = powerofLuminousIntensity;
             Multiplier = multiplier;
@@ -88,14 +89,49 @@ namespace VariableWithUnit
                 unit1.PowerOfTemperature + unit2.PowerOfTemperature, unit1.PowerOfCurrent + unit2.PowerOfCurrent,
                 unit1.PowerOfLuminousIntensity + unit2.PowerOfLuminousIntensity);
 
-        //public static Unit Unit.operator*(Unit left, Unit right) =>
-        //    MultiplyUnits(left, right);
+        public static Unit operator *(Unit left, Unit right) =>
+            MultiplyUnits(left, right);
 
         public static Unit DevideUnits(Unit unit1, Unit unit2) =>
             new Unit(unit1.Multiplier / unit2.Multiplier, unit1.PowerOfLength - unit2.PowerOfLength, unit1.PowerOfTime - unit2.PowerOfTime,
                 unit1.PowerOfMass - unit2.PowerOfMass, unit1.PowerOfSubstanceAmount - unit2.PowerOfSubstanceAmount,
                 unit1.PowerOfTemperature - unit2.PowerOfTemperature, unit1.PowerOfCurrent - unit2.PowerOfCurrent,
                 unit1.PowerOfLuminousIntensity - unit2.PowerOfLuminousIntensity);
+
+        public static Unit operator /(Unit left, Unit right) =>
+            DevideUnits(left, right);
+
+        public bool Equals(Unit unit) =>
+            PowerOfCurrent == unit.PowerOfCurrent &&
+            PowerOfLength == unit.PowerOfLength &&
+            PowerOfLuminousIntensity == unit.PowerOfLuminousIntensity &&
+            PowerOfMass == unit.PowerOfMass &&
+            PowerOfSubstanceAmount == unit.PowerOfSubstanceAmount &&
+            PowerOfTemperature == unit.PowerOfTemperature &&
+            PowerOfTime == unit.PowerOfTime &&
+            Multiplier != 0 &&
+            (Multiplier-unit.Multiplier) / Multiplier < 1e-9;
+
+        public static bool operator == (Unit left, Unit right) =>
+            left.Equals(right);
+
+        public static bool operator !=(Unit left, Unit right) =>
+            !left.Equals(right);
+
+        public static bool IsSameUnit(Unit unit1, Unit unit2) =>
+            unit1.Equals(unit2);
+
+        public override bool Equals(object o) =>
+            base.Equals(o) && Equals((Unit)o); //Is this OK if o is Measure?
+
+        /// <summary>
+        /// Determine if this Unit is of the same measure as another unit or measure.
+        /// If true, this unit can be converted to the other unit or measure.
+        /// </summary>
+        /// <param name="measure"></param>
+        /// <returns></returns>
+        public bool IsSameMeasure(Measure measure) =>
+            this == measure;
 
         #endregion
     }
